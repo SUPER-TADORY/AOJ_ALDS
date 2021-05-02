@@ -16,9 +16,10 @@ for i in range(1,n):
     #print(" ".join(l))
     a=[str(x) for x in l]
     print(" ".join(a))
-
-
+"""
+####################################################################
 #1_1_B
+"""
 l=[int(x) for x in input().split()]
 while 1:
     l=sorted(l)
@@ -27,9 +28,10 @@ while 1:
         break
     l=[n,l[0]]
 print(l[0])
-
+"""
+####################################################################
 #1_1_C
-
+"""
 #####↓これだとタイムオーバー!!!
 def prime(num):
     which=True
@@ -71,11 +73,10 @@ for i in range(n):
     if prime(l):
         out+=1 
 print(out)
-
-
-
+"""
+####################################################################
 #1_1_D
-
+"""
 n=int(input())
 #####↓変数名にminは使えない（予約語）
 min_=int(input())
@@ -85,10 +86,10 @@ for i in range(n-1):
     out_min=max(n-min_,out_min)
     min_=min(min_,n)
 print(out_min)
-
-
+"""
+####################################################################
 #1_2_A
-
+"""
 def sort(l):
     l_=l
     sorted_=0
@@ -113,10 +114,10 @@ l=[int(x) for x in input().split()]
 l_,num=sort(l)
 print(" ".join([str(x) for x in l_]))
 print(num)
-
-
+"""
+####################################################################
 #1_2_B
-
+"""
 def sort(l):
     l_=l.copy()
     count=0
@@ -146,10 +147,10 @@ l=[int(x) for x in input().split()]
 l_,num=sort(l)
 print(" ".join([str(x) for x in l_]))
 print(num)
-
-
+"""
+####################################################################
 #1_2_C
-
+"""
 def bubble(l_):
     l=l_
     for i in range(len(l)):
@@ -196,10 +197,10 @@ print(" ".join(l_a))
 print("Stable")
 print(" ".join(l_b))
 print("Stable" if l_a==l_b else "Not stable")
-
-
+"""
+####################################################################
 #1_2_D
-
+"""
 def insert_(l_,g):
     l=l_.copy()
     cnt_=0
@@ -313,7 +314,7 @@ print(l[top])
 """
 
 ########################################################################
-#1_3_B　ラウンドロビンスケジューリング（Queue）
+#1_3_B　ラウンドロビンスケジューリング（Queue） (時間未解決)
 
 """
 ###hはキューの先頭、tはキューの末尾+1(次のデータが入るポインタ)
@@ -392,7 +393,7 @@ for i,o in out.items():
     print(i,o)
 """ 
 ########################################################################
-#1_3_C　双方向連結リスト
+#1_3_C　双方向連結リスト　（時間未解決）
 """
 import sys
 
@@ -611,8 +612,9 @@ print(max(track))
 
 """
 ########################################################################
-#1_5_A 総当たり、再帰関数
+#1_5_A 総当たり、再帰関数　（時間未解決）
 
+"""
 import sys
 
 #def solve(i,m,n,l):
@@ -652,8 +654,201 @@ def solve(i,m):
 for m in ml:
     #print("yes" if solve(0,m,n,A) else "no")
     print("yes" if solve(0,m) else "no")
+"""
+########################################################################
+#1_5_B 　マージソート(分割統治法)
+"""
+import sys
+
+n=int(input())
+#####↓.split()しないとlistになってくれない！！！
+#l=[int(x) for x in sys.stdin.readline()]
+l=[int(x) for x in sys.stdin.readline().split()]
+#A=[int(x) for x in sys.stdin.readline().split()]
+cnt=0
+
+###統治
+def merge_(A,left,mid,right):
+    
+    ##print("fdkafjireofjejl")
+    #n1=mid-left
+    #n2=right-mid
+    ##print("n1",n1,"n2",n2)    #↓二つに分けた配列を比較して合併するとき、Aを参照しながらAを変更するのは困難であるので、必ず新しい配列を作る！！！
+    #L=[x for x in range(n1+1)]
+    #R=[x for x in range(n2+1)]
+
+    #for i_ in range(n1):
+    #   #####↓+1じゃなくて+i!!!!
+    #   #L[i_]=A[left+1]
+    #    L[i_]=A[left+i_]
+    #for i_ in range(n2):
+    #    #####↓+1じゃなくて+i!!!!
+    #    #R[i_]=A[mid+1]
+    #    R[i_]=A[mid+i_]
+    
+
+
+########↓こっちの方が処理速度遅い！！！
+#######↓処理速度遅かったのはA.copy()のせい！！！ループ内で大きいリストをいちいちコピーしていたら遅くなるので要注意！！！
+    #A_=A.copy()
+    L=A[left:mid]
+    L.append(float("inf"))
+    R=A[mid:right]
+    R.append(float("inf"))
+#########
+
+    #↓番兵を無限に設定しておく
+    #↓二つの分割配列を比べていく中で、どちらか一方の要素がなくなったとき、別の処理を与えるのは簡潔でないので、番兵を用意しておく！！！
+    #L[n1]=float("inf")
+    #R[n2]=float("inf")
+    #print("L",L,"R",R)
+
+#↓これ以降では、二つに分けた部分列を一つの整列された配列に合併！
+#これ以前では、二つの部分列を生成しているだけであるが、部分列の要素が二つのときから連鎖していくので、自動的に整列した配列になる。
+
+    i=0
+    j=0
+
+    #for k in range(left,right):
+    for k in range(right-left):
+        global cnt
+        #↓L[i]==R[j]であった場合は、左を優先→→→安定なソートになる！！！
+        if L[i]<=R[j]:
+            A[left+k]=L[i]
+            i+=1
+            #cnt+=1
+        else:
+            A[left+k]=R[j]
+            j+=1
+            #cnt+=1
+        cnt+=1
 
     
+    ###↓mergeSort()ないでは最終出力をうまく取り出せないのでここで！！！
+    if right-left==n:
+        #print(A)
+        print(" ".join([str(x) for x in A]))
+    
+    
+
+###分割
+def mergeSort(A_,left,right):
+    #####↓これがなくても、引数としてのAは更新されてしまう
+    A=A_
+    if left+1<right:
+        mid=(left+right)//2
+        mid=mid
+        #↓再帰関数！！！　左と右に分割
+        mergeSort(A,left,mid)
+        mergeSort(A,mid,right)
+        #↓分割した二つを統治する!!!
+        merge_(A,left,mid,right)
+    
+
+mergeSort(l,0,n)
+#print(*A)
+print(cnt)
+"""
+########################################################################
+#1_5_C コッホ曲線
+"""
+import sys
+from math import sin, cos, sqrt, radians
+
+def kock(n,p1_x,p1_y,p2_x,p2_y):
+    if n==0:
+        return #####関数終了！！！
+
+    s_x=(2*p1_x+p2_x)/3
+    s_y=(2*p1_y+p2_y)/3
+    t_x=(2*p2_x+p1_x)/3
+    t_y=(2*p2_y+p1_y)/3
+    u_x=(t_x-s_x)*cos(radians(60))-(t_y-s_y)*sin(radians(60))+s_x
+    #######↓+と-間違えていた！！！
+    #u_y=(t_x-s_x)*sin(radians(60))-(t_y-s_y)*cos(radians(60))+s_y
+    u_y=(t_x-s_x)*sin(radians(60))+(t_y-s_y)*cos(radians(60))+s_y
+
+#######↓新しくできた４辺に対して再帰を適用する！(深さを一つ引いて継承していく！！！)
+    kock(n-1,p1_x,p1_y,s_x,s_y)
+    print(format(s_x,".8f"),format(s_y,".8f"))
+    kock(n-1,s_x,s_y,u_x,u_y)
+    print(format(u_x,".8f"),format(u_y,".8f"))
+    kock(n-1,u_x,u_y,t_x,t_y)
+    print(format(t_x,".8f"),format(t_y,".8f"))
+    kock(n-1,t_x,t_y,p2_x,p2_y)
+
+n=int(input())
+print(0,0)
+#print(format(0,".8f"),format(0,".8f"))
+kock(n,0,0,100,0)
+print(100,0)
+#print(format(100,".8f"),format(100,".8f"))
+"""
+########################################################################
+#1_5_D 反転数
+import sys
+
+n_=int(input())
+l_=list(map(int,sys.stdin.readline().split()))
+
+def bubble(n,l):
+    cnt=0
+    for i in range(1,n):
+        j=i-1
+    ##########↓ここで、jが０以上であることを条件に入れないといけない!!!
+        #while l[j+1]<l[j] :
+        while l[j+1]<l[j] and j>=0:
+            l[j+1],l[j]=l[j],l[j+1]
+            cnt+=1
+            j-=1
+    
+    return cnt
+
+##########分割統治法の利用
+###統治
+
+cnt=0
+
+def merge_(A,left,mid,right):
+    global cnt
+
+    which=False
+    L=A[left:mid]
+    L.append(float("inf"))
+    R=A[mid:right]
+    R.append(float("inf"))
+
+    i=0
+    j=0
+   
+    for k in range(right-left):
+        if L[i]<=R[j]:
+            A[left+k]=L[i]
+            i+=1
+            #if i==len(L)-1:
+            #    which=True
+        else:
+            A[left+k]=R[j]
+            j+=1
+            #if which:
+            #    cnt+=1
+            cnt+=(mid-left)-i
+
+    
+
+###分割
+def mergeSort(A_,left,right):
+    A=A_
+    if left+1<right:
+        mid=(left+right)//2
+        mid=mid
+        mergeSort(A,left,mid)
+        mergeSort(A,mid,right)
+        merge_(A,left,mid,right)
+
+mergeSort(l_,0,n_)
+#print(cnt)
+print(cnt)
 
 
 
