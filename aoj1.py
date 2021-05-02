@@ -1,3 +1,4 @@
+####################################################################
 #1_1_A
 """
 n=int(input())
@@ -890,7 +891,7 @@ print(*B)
 """
 ########################################################################
 #1_6_B　Partition
-
+"""
 import sys
 
 n=int(input())
@@ -901,12 +902,15 @@ def partition(p,r):
     global A,n
 
     x=A[r]
+######↓最初i=-1となるが、それが正しい！！！ iは基準を挿入するインデックス!!!
     i=p-1
-    print(i)
+    #print(i)
     for j in range(p,r):
         if A[j]<=x:
             i+=1
+            ###↓i+=1で基準を一個ずらしてから交換!!(A[j]を基準の左に、A[i]を右に!!!)
             A[i],A[j]=A[j],A[i]
+    #↓最後に末尾の基準となる数字を基準点に！！！
     A[i+1],A[r]=A[r],A[i+1]
     return i+1
 
@@ -920,11 +924,105 @@ for i,o in enumerate(A):
         else:
         ########↓最後は改行しないとpresentation errorが起こる!!!!!
             print(o)
+"""
+########################################################################
+#1_6_C クイックソート
+
+import sys
+
+n=int(input())
+A=[]
+for _ in range(n):
+    A.append(sys.stdin.readline().rstrip("\n"))
+
+A_=A.copy()
+
+def partition(p,r):
+    global A,n
+
+    x=int(A[r].split()[1])
+    i=p-1
+    for j in range(p,r):
+        if int(A[j].split()[1])<=x:
+            i+=1
+            A[i],A[j]=A[j],A[i]
+    A[i+1],A[r]=A[r],A[i+1]
+    return i+1
+
+def quickSort(p,r):
+    global A,n
+
+    if p<r:
+        #print(A)
+        q=partition(p,r)
+        quickSort(p,q-1)
+        quickSort(q+1,r)
+
+###↓安定なソート(Memory limit exceededなので使えない！！！)
+def countingSort():
+    global n,A_
+
+    A__=[int(x.split()[1]) for x in A_]
+    k=max(A__)
+    #print(A_)
+    #print(A__)
+    B=[0 for _ in range(n)]
+    C=[0 for _ in range(k+1)]
+    for j in range(n):
+        C[int(A_[j].split()[1])]+=1
     
+    for i in range(1,k+1):
+        C[i]=C[i]+C[i-1]
+    
+    #print("C",C)
+    
+    for m in reversed(range(0,n)):
+        B[C[int(A_[m].split()[1])]-1]=A_[m]
+        C[int(A_[m].split()[1])]-=1
 
+    return B
 
+###↓安定なソート　マージソートは安定なので、比較対象として利用できる！！！
+def merge_(left,mid,right):
+    L=A_[left:mid]
+    L.append(f"s {10000000000}")
+    R=A_[mid:right]
+    R.append(f"s {10000000000}")
 
+    i=0
+    j=0
+   
+    for k in range(right-left):
+        if float(L[i].split()[-1])<=float(R[j].split()[-1]):
+            A_[left+k]=L[i]
+            i+=1
         
+        else:
+            A_[left+k]=R[j]
+            j+=1
+
+###分割
+def mergeSort(left,right):
+    if left+1<right:
+        mid=(left+right)//2
+        mid=mid
+        mergeSort(left,mid)
+        mergeSort(mid,right)
+        merge_(left,mid,right)
+
+#partition(0,n)
+quickSort(0,n-1)
+mergeSort(0,n)
+#print(A)
+#print(A_)
+if A==A_:
+    print("Stable")
+else:
+    print("Not stable")
+
+for o in A:
+    print(o)
+
 
         
     
