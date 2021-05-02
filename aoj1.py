@@ -786,6 +786,7 @@ print(100,0)
 """
 ########################################################################
 #1_5_D 反転数
+"""
 import sys
 
 n_=int(input())
@@ -804,7 +805,7 @@ def bubble(n,l):
     
     return cnt
 
-##########分割統治法の利用
+##########分割統治法の利用で計算量大幅削減！！！
 ###統治
 
 cnt=0
@@ -831,6 +832,8 @@ def merge_(A,left,mid,right):
             A[left+k]=R[j]
             j+=1
             #if which:
+        ###########↓ここで、cntとして追加するのは１ではない！！！ +1では、Rの要素一つについて何個Lにそれより大きい要素があるのかを記録できない！！
+        #############だから、Rが追加される時点でLに残っている要素数を加算していく必要がある！！！
             #    cnt+=1
             cnt+=(mid-left)-i
 
@@ -849,7 +852,75 @@ def mergeSort(A_,left,right):
 mergeSort(l_,0,n_)
 #print(cnt)
 print(cnt)
+"""
+########################################################################
+#1_6_A　計数ソート
+"""
+import sys
 
+n=int(input())
+A=list(map(int,sys.stdin.readline().split()))
+
+def countingSort():
+    global n,A
+
+    k=max(A)
+    B=[0 for _ in range(n)]
+    #↓ここで、Cに各要素の出現回数を記録する！！！
+    C=[0 for _ in range(k+1)]
+    for j in range(n):
+        C[A[j]]+=1
+    #print("C",C)
+######↓ここで、rangeに0含めると、だめ！！！
+    #for i in range(k+1):
+    for i in range(1,k+1):
+        C[i]=C[i]+C[i-1]
+    #print("C",C)
+    #####↓後ろから入力していくことで安定なソートに！！！
+    for m in reversed(range(0,n)):
+        #print("M",m)
+    #####↓Cには、何番目かが記録されているので、Cの数字をそのまま入力インデックスにすれば良い！！！
+        #print(B,C[A[m]])
+        B[C[A[m]]-1]=A[m]
+        C[A[m]]-=1
+
+    return B
+B=countingSort()
+print(*B)
+"""
+########################################################################
+#1_6_B　Partition
+
+import sys
+
+n=int(input())
+A=list(map(int,sys.stdin.readline().split()))
+
+
+def partition(p,r):
+    global A,n
+
+    x=A[r]
+    i=p-1
+    print(i)
+    for j in range(p,r):
+        if A[j]<=x:
+            i+=1
+            A[i],A[j]=A[j],A[i]
+    A[i+1],A[r]=A[r],A[i+1]
+    return i+1
+
+k=partition(0,n-1)
+for i,o in enumerate(A):
+    if i==k:
+        print(f"[{o}]",end=" ")
+    else:
+        if i!=n-1:
+            print(o,end=" ")
+        else:
+        ########↓最後は改行しないとpresentation errorが起こる!!!!!
+            print(o)
+    
 
 
 
