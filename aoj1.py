@@ -927,7 +927,7 @@ for i,o in enumerate(A):
 """
 ########################################################################
 #1_6_C クイックソート
-
+"""
 import sys
 
 n=int(input())
@@ -1000,8 +1000,6 @@ def merge_(left,mid,right):
         else:
             A_[left+k]=R[j]
             j+=1
-
-###分割
 def mergeSort(left,right):
     if left+1<right:
         mid=(left+right)//2
@@ -1022,11 +1020,227 @@ else:
 
 for o in A:
     print(o)
+"""
+########################################################################
+#1_6_D　根付き木
 
+########↓死ね無能
+"""
+from sys import stdin
 
-        
+n=int(input())
+
+class Node():
+    def __init__(self):
+    ########↓インスタンスの持つ変数は、引数に取らなくても変更できる！！！
+        self.parent=-1
+        self.mostleft=None
+        self.right=None
+        self.root=[]
+
+tree_dict={}
+cnt=0
+
+######↓親の方からたどる！
+def get_depth_for_a_tree(nod,depth=0):
+    global tree_dict,cnt
+
+    cnt+=1
+    print("###################",cnt)
+    ml=tree_dict[nod].mostleft
+    r=tree_dict[nod].right
+
+    print("depth___",depth)
+
+    if ml<0 or r<0:
+        print("depth",depth)
+        return 
+
+    print("ml",ml,"r",r)
+
+    if ml>=0:
+        get_depth_for_a_tree(ml,depth=depth+1)
+        print("ml")
+    if r>=0:
+        get_depth_for_a_tree(r,depth=depth)
+        print("r")
+
+def get_depth_for_all():
+    global tree_dict
+
+    #selected_key_dict={key:obj for key,obj in zip(tree_dict) if key>=0}
+    selected_key_list=[key for key in tree_dict.keys() if key>=0]
+    print("selected_key_list",selected_key_list)
+
+    for key in selected_key_list:
+        get_depth_for_a_tree(key)
+
+D={}
+def get_depth(u,p):
+    global tree_dict,D
+
+    D[u]=p
+    if tree_dict[u].right is not None:
+        get_depth(tree_dict[u].right,p)
+    if tree_dict[u].mostleft is not None:
+        get_depth(tree_dict[u].mostleft,p+1)
     
-  
+
+D_={}
+
+print()
+
+for i in range(n):
+    #l=list(map(int,stdin.readline().split()))
+    #a=l[0]
+    #b=l[1]
+    #l_children=l[2:]
+######↓省略した書き方ができる！！！
+    a,b,*root=list(map(int,stdin.readline().split()))
+
+    #print(root)
+
+    if a in tree_dict.keys():
+        #print("また",a)
+        if b==0:
+            #type_="leaf"
+            #D_[a]="leaf"
+            #print("ない",a)
+            pass
+
+        else:
+            tree_dict[a].mostleft=root[0]
+            tree_dict[a].root=root
+            #type_="internal node"
+            #D_[a]="internal node"
+
+            for m,j in enumerate(root):
+####################↓ここで新たに生成しているが、すでに子についてのノードができている可能性を考慮していない！！！　要注意！！！
+                #tree_dict[j]=Node() 
+                #print(j,tree_dict.keys())
+                if j in tree_dict.keys():
+                    #print(j,"すでにある")
+                    pass
+                else:
+                    tree_dict[j]=Node() 
+                tree_dict[j].parent=a
+                try:
+                ###########↓root[j+1]だと正しいインデックス示ていない！！！
+                    #tree_dict[j].right=root[j+1]
+                    tree_dict[j].right=root[m+1]
+                    #print(m,root)
+                except:
+                    pass
+    
+    else:  
+        #print("新たに",a)
+        tree_dict[a]=Node()
+        if b!=0:
+            tree_dict[a].mostleft=root[0]
+            tree_dict[a].root=root
+        #type_="root"
+        #D_[a]="root"
+
+    ######子供たちもtree_dictに追加しておく！！！
+        #print(i,"dfzjkhglfdi")
+        for m,j in enumerate(root):
+            #tree_dict[j]=Node() 
+    ####################↓ここで新たに生成しているが、すでに子についてのノードができている可能性を考慮していない！！！　要注意！！！
+            if j in tree_dict.keys():
+                #print(j,"すでにある")
+                pass
+            else:
+                tree_dict[j]=Node() 
+
+            tree_dict[j].parent=a
+            try:
+            ########↓root[j+1]だと正しいインデックス示ていない！！！
+                #tree_dict[j].right=root[j+1]
+                tree_dict[j].right=root[m+1]
+            except:
+                pass
+
+########↓ここでprintするのであれば良いが、外でやるならtypeは逐一保存しておかないと全て同じになってしまう！！！
+    #print(f"node {a}: parent {tree_dict[a].parent}, depth = {0}, {type_}, {root}")
+
+for node in range(n):
+    if tree_dict[node].parent==-1:
+        get_depth(node,0)
+        break
+
+for a in range(n):
+    #print(f"node {a}: parent = {tree_dict[a].parent}, depth = {D[a]}, {type_}, {root}")
+    #print(f"node {a}: parent = {tree_dict[a].parent}, depth = {D[a]}, {D_[a]}, {root}")
+
+    type_="root" if tree_dict[a].parent==-1 else "internal node" if tree_dict[a].mostleft is not None else "leaf"
+    #print(f"node {a}: parent = {tree_dict[a].parent}, depth = {D[a]}, {type_}, {root}")
+    print(f"node {a}: parent = {tree_dict[a].parent}, depth = {D[a]}, {type_}, {tree_dict[a].root}")
+    
+
+#print(D)
+#for i,node in tree_dict.items():
+#   print(i,node.parent,node.mostleft,node.right)
+"""
+########↓お手本
+"""
+from sys import stdin
+
+
+class Node():
+    def __init__(self,pa=-1,chs=None):
+        self.pa=pa
+        self.chs=chs
+
+n=int(input())
+tree={id:Node() for id in range(n)}
+for _ in range(n):
+    id,_,*chs=map(int,stdin.readline().split())
+    tree[id].chs=chs
+    ####↓子をdictに入れるときにpaを設定してしまう！！！
+    for ch in chs:
+        tree[ch].pa=id
+
+def set_depths(id,depth):
+    tree[id].depth=depth
+    for ch in tree[id].chs:
+        set_depths(ch,depth+1)
+
+for id in tree:
+    if tree[id].pa==-1:
+        set_depths(id,0)
+        break
+
+for id,node in tree.items():
+    kind= "root" if node.pa == -1 else "internal node" if node.chs else "leaf"
+    print(f"node {id}: parent = {node.pa}, depth = {node.depth}, {kind}, {node.chs}")
+"""
+########################################################################
+#1_6_D　二分木
+
+import sys
+
+class Node():
+    def __init__(self,chs=[],pa=-1):
+        self.pa=pa
+        self.chs=chs
+
+n=int(input())
+
+######↓初期状態で何も入っていないと、for ch in chs：のところでエラーが起こる！！！
+#tree={}
+tree={id:Node() for id in range(n)}
+
+for i in range(n):
+    a,*chs=list(map(int,sys.stdin.readline().split()))
+    tree[a].chs=chs
+
+    for ch in chs:
+        #print(ch)
+        if ch>0:
+            tree[ch].pa=a
+
+for k,v in tree.items():
+    print("id",k,"chs",v.chs,"pa",v.pa)
 
 
 
