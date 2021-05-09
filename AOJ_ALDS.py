@@ -1377,7 +1377,7 @@ print("",*post_l)
 """
 ########################################################################
 #1_7_D Reconstruction of a Tree (難！！！)
-
+"""
 from sys import stdin 
 
 n=int(input())
@@ -1459,6 +1459,107 @@ for i in range(1,n+1):
     if tree[i].pa==-1:
         post_parse(i)
 print(*post_l)
+"""
+########################################################################
+#1_8_A 二分探索木１
+#1_8_B　二分探索木2
+
+from sys import stdin
+
+class Node():
+    def __init__(self,key=None,left=None,right=None):
+        #そのノード自身の値！！！
+        self.key=key
+        self.left=left
+        self.right=right
+
+######↓rootはたった一つh￥なのでグローバル変数で良い！！！
+root=None
+#####↓今回は、Nodeクラスにkeyを保持するので、tree辞書はいらない！！！
+tree={} 
+
+#↓1_8_A 二分探索木１
+def insert(key):
+    global root
+
+    if root:
+        ch=root
+        while ch is not None:
+            pa,ch=ch,ch.left if key<ch.key else ch.right
+        if key<pa.key:
+            pa.left=Node(key)
+        else:
+            pa.right=Node(key)
+
+    #↓rootがNoneだった場合（最初だけ）
+    elif not root:
+        root=Node(key)
+
+def find(key):
+    global root
+
+    ch=root
+    out="no"
+    while ch is not None:
+        if key==ch.key:
+            out="yes"
+            break
+    #########↓これだとinvalid syntax!!!
+        #pa,ch=ch,ch.left if key<ch.key else ch.right if key>ch.key
+        #pa,ch=ch,ch.left if key<ch.key else ch.right if key>ch.key else pass
+        elif key<ch.key:
+            pa,ch=ch,ch.left
+        else:
+            pa,ch=ch,ch.right
+    
+    print(out)
+    
+
+pre_l=[]
+def pre_parse(node):
+    global pre_l
+
+    if node is None:
+        return
+    
+    pre_l.append(node.key)
+    pre_parse(node.left)
+    pre_parse(node.right)
+
+in_l=[]
+def in_parse(node):
+    global in_l
+
+    if node is None:
+        return
+    
+    in_parse(node.left)
+    in_l.append(node.key)
+    in_parse(node.right)
+
+
+n=int(input())
+key=0
+for i in range(n):
+    #st,key=stdin.readline().split()
+    input_=stdin.readline()
+    try:
+        st,key=input_.split()
+    except:
+        st=input_
+    key=int(key)
+    if st=="insert":
+        insert(key)
+    elif st=="find":
+        find(key)
+    else:
+        pre_parse(root)
+        in_parse(root)
+        print("",*in_l)
+        print("",*pre_l)
+    ######↓printする毎にlist初期化していかないといけない！！！
+        in_l=[]
+        pre_l=[]
 
 
 
