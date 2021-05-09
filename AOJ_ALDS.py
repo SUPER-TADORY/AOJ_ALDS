@@ -1462,7 +1462,8 @@ print(*post_l)
 """
 ########################################################################
 #1_8_A 二分探索木１
-#1_8_B　二分探索木2
+#1_8_B 二分探索木2
+#1_8_C 二分探索木3
 
 from sys import stdin
 
@@ -1513,7 +1514,68 @@ def find(key):
             pa,ch=ch,ch.right
     
     print(out)
+
+#↓複雑！！！
+def delete(key):
+    global root
+
+    pa,node=None,root
+########↓二分木を探索して、目的のキーのところまで移動する。(nodeは現在のノード)
+    while node.key!=key:
+    ######↓pa,nodeはあくまでもNode()クラスのインスタンスなので、.keyを与えてはいけない！！！
+        #pa,node=node.key,node.left if key<node.key else node.right
+        pa,node=node,node.left if key<node.key else node.right
+##########↓現在いるノードが二つの子ノードを持っているとき(この時の処理が一番複雑！！！)
+    if node.right and node.left:
+    ######↓目的のノードが二つの子ノードを持っている場合は、左部分木の最大のノードと置換する！！！
+        #####↓nodeは現在のノードとして保持しておきたいのでnoedではなく、to_delとして考える！！！
+        ####↓この時のpaはあくまでも消去するto_delの親!!!paは現在のノードの親ではないことに要注意！！！
+        #pa,node=node,node.left
+        pa,to_del=node,node.left
+    #####↓なぜか、どっちのループ条件にしても、うまくいく　よくわからない、、、、、、
+        while node.right is not None:
+        #while to_del.right:
+            #####↓nodeは現在のノードとして保持しておきたいのでnoedではなく、to_delとして考える！！！
+            #pa,node=node,node.right
+            #pa,to_del=node,node.right
+            pa,to_del=to_del,to_del.right
+            print("gfggghghh",node.right)
+        node.key=to_del.key
     
+    else:
+        to_del=node
+######↑to_delは子ノードが高々１個であるノードとして保持している！！！(後で削除しないといけない！！)
+#####↓to_delはleftかrightどちらかしかないか、どっちもない。なのでchにはどちらかある方が代入される！！！
+    ch=to_del.left or to_del.right
+######↓paはto_del(削除するノード)の親ノード！！！ chはto_delの子ノード！！！
+    if pa is None:
+        root=ch
+    elif pa.left==to_del:
+        pa.left=ch
+    #elif pa.right==to_del:
+    else:
+        pa.right=ch
+
+####↓参考にしたコード！！！
+def delete_(key):
+  global root
+  pa, node = None, root
+  while node.key != key:
+    pa, node = node, node.left if key < node.key else node.right
+  if node.left and node.right:
+    pa, to_del = node, node.right
+    while to_del.left:
+      pa, to_del = to_del, to_del.left
+    node.key = to_del.key
+  else:
+    to_del = node
+  ch = to_del.left or to_del.right
+  if not pa:
+    root = ch
+  elif pa.left == to_del:
+    pa.left = ch
+  else:
+    pa.right = ch
 
 pre_l=[]
 def pre_parse(node):
@@ -1552,6 +1614,8 @@ for i in range(n):
         insert(key)
     elif st=="find":
         find(key)
+    elif st=="delete":
+        delete_(key)
     else:
         pre_parse(root)
         in_parse(root)
