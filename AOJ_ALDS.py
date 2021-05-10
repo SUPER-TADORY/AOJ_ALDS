@@ -1464,7 +1464,7 @@ print(*post_l)
 #1_8_A 二分探索木１
 #1_8_B 二分探索木2
 #1_8_C 二分探索木3
-
+"""
 from sys import stdin
 
 class Node():
@@ -1532,9 +1532,9 @@ def delete(key):
         ####↓この時のpaはあくまでも消去するto_delの親!!!paは現在のノードの親ではないことに要注意！！！
         #pa,node=node,node.left
         pa,to_del=node,node.left
-    #####↓なぜか、どっちのループ条件にしても、うまくいく　よくわからない、、、、、、
-        while node.right is not None:
-        #while to_del.right:
+    #####↓なぜか、どっちのループ条件にしても、うまくいく　←単に、このif条件が発動されていないだけだった！！！
+        #while node.right is not None:
+        while to_del.right:
             #####↓nodeは現在のノードとして保持しておきたいのでnoedではなく、to_delとして考える！！！
             #pa,node=node,node.right
             #pa,to_del=node,node.right
@@ -1624,6 +1624,71 @@ for i in range(n):
     ######↓printする毎にlist初期化していかないといけない！！！
         in_l=[]
         pre_l=[]
+"""
+########################################################################
+#1_9_A 完全二分木
+
+import sys
+
+n=int(input())
+l=[*map(int,sys.stdin.readline().split())]
+
+for i,key in enumerate(l):
+    print(f"node {i+1}",end=": ")
+    print("key =",key,end=", ")
+########↓条件分岐を一文で書けるのは、変数代入ときだけ！！！
+    #print("parent key =",l[(i+1)//2-1],end=",") if i!=0 else pass if i==0
+    if i!=0:
+        print("parent key =",l[(i+1)//2-1],end=", ")
+    try: 
+        print("left key =",l[i*2+1],end=", ")  
+    except: 
+        pass
+    try: 
+        print("right key =",l[i*2+2],end=", ") 
+    except:
+        pass
+    print(" ")
+
+########################################################################
+#1_9_B　最大ヒープ
+
+import sys
+
+n=int(input())
+H=[*map(int,sys.stdin.readline().split())]
+
+def maxHeapify(A,i):
+    #↓着目ノードと子ノード二つの合計三つの数字を比べたい！！
+    #↓後でmaxを出したいので、存在しない場合もー無限としておく
+#####↓maxは交換のためにindexを保持しておきたいので、辞書でindex:valueとしておいた方が良い！！！
+    ch={A[i]:i}
+    #left=A[i*2+1] if i*2+1<=n else -float(inf)
+#######↓最大のインデックスはnではなくn-1!!!!要注意！！！
+    #if i*2+1<=n:
+    if i*2+1<=n-1:
+        ch[A[i*2+1]]=i*2+1
+    else:
+        pass
+    #right={A[i*2+2]:i*2+2 if i*2+2<=n else -float(inf):None}
+#######↓最大のインデックスはnではなくn-1!!!!要注意！！！
+    #if i*2+2<=n:
+    if i*2+2<=n-1:
+        ch[A[i*2+2]]=i*2+2
+    else:
+        pass
+    #print(i,ch)
+    #max_h=max(A[i],left,right)
+    max_value=max(ch.keys())
+    max_i=ch[max_value]
+
+    if max_i!=i:
+        A[i],A[max_i]=A[max_i],A[i]
+        maxHeapify(A,max_i)
+
+for i in reversed(range(n//2)):
+    maxHeapify(H,i)
+print("",*H)
 
 
 
