@@ -1627,7 +1627,7 @@ for i in range(n):
 """
 ########################################################################
 #1_9_A 完全二分木
-
+"""
 import sys
 
 n=int(input())
@@ -1649,10 +1649,10 @@ for i,key in enumerate(l):
     except:
         pass
     print(" ")
-
+"""
 ########################################################################
 #1_9_B　最大ヒープ
-
+"""
 import sys
 
 n=int(input())
@@ -1689,8 +1689,133 @@ def maxHeapify(A,i):
 for i in reversed(range(n//2)):
     maxHeapify(H,i)
 print("",*H)
+"""
+########################################################################
+#1_9_C　優先順位キュー
+"""
+import sys
+import heapq
+
+heap=[]
+
+#####↓heapq.heappop()では、最小値しか得られない→→→-1をかけて最小値取り出してから、-1をかければ良い！！！
+while 1:
+    txt=input()
+    if txt[0]=="i":
+        #num=int(txt.split()[-1])
+        num=int(txt.split()[-1])*(-1)
+        heapq.heappush(heap,num)
+    elif txt=="extract":
+        print(heapq.heappop(heap)*(-1))
+    else:
+        break
+"""
+########################################################################
+#1_10_A　フィボナッチ数列(動的計画法)
+"""
+n=int(input())
+
+#↓全探索(再帰関数による)########## TLE
+def fib_all(i:int):
+    if i==0: return 0
+    if i==1: return 1
+
+########↓この再帰関数だと、前半と後半で大体の計算が重複するのに、別々にやってしまうので、計算コストが無駄に多くなる！！！
+    return fib_all(i-1)+fib_all(i-2)
 
 
+#↓再帰関数のメモ化########## TLE
+bool_done=[False for _ in range(n+2)]
+memo_l=[None for _ in range(n+2)]
+def fib_memo(m:int):
+    if m==0: return 0
+    if m==1: return 1
 
+#######↓違う！！　再帰関数の形をちょっと変形すればいいだけ！！！
+    #if not bool_done[m-1]:
+    #    m_1=memo_l[m-1]
+    #else:
+    #    m_1=fib_memo(m-1)
+    #    bool_done[m-1]=True
 
+    #if not bool_done[m-2]:
+    #    m_1=memo_l[m-2]
+    #else:
+    #    m_1=fib_memo(m-2)
+    #    bool_done[m-2]=True
 
+    if bool_done[m]: return memo_l[m]
+
+    return fib_memo(m-1)+fib_memo(m-2)
+    
+
+#↓動的計画法(ループ) これしか制限時間クリアできない！！！
+def fib_loop(m:int):
+    if m==0: return 0
+    if m==1: return 1
+
+    i_1=1
+    i_2=0
+    for _ in range(2,m):
+        i_1,i_2=i_1+i_2,i_1
+    return i_1+i_2
+
+print(fib_loop(n+1))
+"""
+########################################################################
+#1_10_B 連鎖行列式(動的計画法)
+
+#↓トップダウン方式########################
+"""
+import sys 
+from functools import lru_cache
+
+n=int(input())
+###↓k番目の列数とk+1番目の行数は等しいので、最末尾以外は列数のみ記録していれば良い！！！
+p=[int(sys.stdin.readline().split()[0]) for _ in range(n-1)]+[*map(int,sys.stdin.readline().split())]
+
+#####↓デコレータ！！！下に定義する関数を組み込み、機能を修飾する！！！（今回は、直前のデータ自動的に保持する機能）
+@lru_cache(maxsize=None)
+def n_mul(i,j):
+#####↓このとき、n_mulで考慮する行列積の要素は一つなので、掛け算の方法は０
+    if j-i==1:
+        return 0
+    
+ ######↓関数の後に[]をつけるのアホか！！！　[]ではなく()だろ！！！
+    #return min( n_mul[i,k] + n_mul[k,j] + p[i]*p[k]*p[j] for k in range(i+1,j))
+    return min( n_mul(i,k) + n_mul(k,j) + p[i]*p[k]*p[j] for k in range(i+1,j))
+
+#print(n_mul(0,n))
+"""
+#↓ボトムアップ方式########################
+"""
+import sys 
+from functools import lru_cache
+
+n=int(input())
+###↓k番目の列数とk+1番目の行数は等しいので、最末尾以外は列数のみ記録していれば良い！！！
+p=[int(sys.stdin.readline().split()[0]) for _ in range(n-1)]+[*map(int,sys.stdin.readline().split())]
+
+#####↓最初討ち取る時の番兵として無限が便利！！(対角成分は0!)
+INF=2**32-1
+dp=[[INF]*n for _ in range(n)]
+for ij in range(n):
+    dp[ij][ij]=0
+
+###↓一番大きなループがlなのには意味がある！！！　最初に対角成分に近いところから埋めていかないと、細分化している意味がない！！！
+for l in range(1,n):#対角成分からどれくらい離れているか
+    #for i in range(n-l):
+    for i in range(n):
+        j=i+l
+        if j>=n:
+            continue
+        for k in range(i,j):
+    ################↓p[i]*p[k+1]*p[j+1]のところ、index正確に！！！(気づくのにめちゃ時間かかった！！！)
+                #dp[i][j]=min(dp[i][k]+dp[k][j]+p[i]*p[k]*p[j],dp[i][j])→→→→→
+                dp[i][j]=min(dp[i][k]+dp[k+1][j]+p[i]*p[k+1]*p[j+1],dp[i][j])
+                #print(dp)
+
+print(dp[0][-1])
+"""
+########################################################################
+#1_10_C
