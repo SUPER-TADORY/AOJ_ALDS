@@ -1712,7 +1712,7 @@ while 1:
 """
 ########################################################################
 #1_10_A　フィボナッチ数列(動的計画法)
-
+"""
 n=int(input())
 
 #↓全探索(再帰関数による)########## TLE
@@ -1761,7 +1761,7 @@ def fib_loop(m:int):
     return i_1+i_2
 
 print(fib_loop(n+1))
-
+"""
 ########################################################################
 #1_10_B 連鎖行列式(動的計画法)
 
@@ -1819,7 +1819,7 @@ print(dp[0][-1])
 """
 ########################################################################
 #1_10_C　最長共通部分列(動的計画法)
-
+"""
 #↓TLEになるやつ#############################
 import sys
 
@@ -1908,3 +1908,66 @@ for _ in range(n):
             l_[o-1]=1
     print(*l_)
 """
+########################################################################
+#1_11_B　深さ優先探索
+
+import sys
+
+time=0
+
+#####↓グラフは　11_Aでやったように、隣接行列か隣接リスト表現で表されるので、いちいちクラスとか作らない！！！
+class gr(object):
+    def __init__(self,pa=None,ch=[]):
+        self.time_d=None
+        self.time_f=None
+        self.ch=ch
+        self.pa=pa
+
+n=int(input())
+G=[gr() for _ in range(n)]
+for _ in range(n):
+    u,k,*l=map(int,sys.stdin.readline().split())
+######↓グラフのidは1スタートなので、リストのインデックスとして扱う場合は-1しないといけないことに要注意！！！
+    #G[u-1].ch=l
+    G[u-1].ch=[x-1 for x in l]
+    for o in l:
+        G[o-1].pa=u-1
+
+#↓いらない！このroot見つけたタイミングでvisit()スタートすれば良い！！！
+def root():
+    for id,node in enumerate(G):
+        if not node.pa:
+            return id
+
+def visit(id):
+    global time
+
+#####↓最深部までいくと、探索していないところまで戻らないといけないが、その戻るコードは書かなくて良い
+######→これは、発見したtimeと記録するtimeの間に再帰関数を入れることでそのノードの子供が全て探索終了したら自動的に
+######→戻ってきてくれるからである！(再帰関数の使い方重要！！！！！！)
+    time+=1
+    G[id].time_d=time
+    for v_id in G[id].ch:
+        if not G[v_id].time_d:
+            #print(v_id+1)
+            visit(v_id)
+    time+=1
+    G[id].time_f=time
+
+######↓この出力方法だとうまくいかない！！
+for id,node in enumerate(G):
+        if not node.pa:
+            print(id+1)
+            visit(id)
+
+#for i,node in enumerate(G):
+    #print(i+1,node.time_d,node.time_f)
+######↓↓↓↓↓↓↓↓↓↓↓↓↓↓こちらにするとうまくいった！！！
+"""
+for u in range(n):
+  if not G[u].time_d:
+    visit(u)
+  print(u+1, G[u].time_d, G[u].time_f)
+"""
+
+        
