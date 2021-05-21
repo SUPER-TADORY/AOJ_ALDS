@@ -1910,7 +1910,7 @@ for _ in range(n):
 """
 ########################################################################
 #1_11_B　深さ優先探索
-
+"""
 import sys
 
 time=0
@@ -1954,20 +1954,88 @@ def visit(id):
     time+=1
     G[id].time_f=time
 
-######↓この出力方法だとうまくいかない！！
-for id,node in enumerate(G):
-        if not node.pa:
-            print(id+1)
-            visit(id)
+######↓この出力方法だとうまくいかない！！id=2の時もvisit()発動してしまう！！！
+
+#for id,node in enumerate(G):
+#        if not node.pa:
+#            print(id+1)
+#            visit(id)
 
 #for i,node in enumerate(G):
     #print(i+1,node.time_d,node.time_f)
 ######↓↓↓↓↓↓↓↓↓↓↓↓↓↓こちらにするとうまくいった！！！
-"""
+####################time_dがなければ未訪問であるということ！！！
 for u in range(n):
   if not G[u].time_d:
+    print("cnjdkzvlfdhov",u+1)
     visit(u)
   print(u+1, G[u].time_d, G[u].time_f)
 """
+########################################################################
+#1_11_C　幅優先探索
+
+import sys
+
+n=int(input())
+G=[[] for _ in range(n)]
+for _ in range(n):
+    u,k,*l=map(int,sys.stdin.readline().split())
+######↓ここで、全てのchを-1してしまった方が、後のコードが簡潔でややこしくならない！！！
+    G[u-1]=l
+
+#print("G",G)
+
+queue=[]
+is_visited={key:False for key in range(n)}
+###↓queueの要素は、id順ではないので、結果出力用の辞書を作るべき！！！
+result={}
+
+#####↓特定のidに関するcostを一回一回求めるのではなくて、一気に全てのノードのコスト求めた方が良い！！！ 
+###→queueとis_visitedはグローバル変数の方が良い！！！
+#def search(id):
+def search():
+    #queue=[]
+    #is_visited={key:False for key in range(n)}
+    global queue,is_visited
+
+    current_id=0
+    queue.append([0,0])
+#####↓最初のノードだけは、最初にTrueにしておかないといけない！！！
+    is_visited[current_id]=True
+########↓queueに追加されないノードもあるので、その場合、エラーが起きてしまうことに要注意！！！
+#####→queueの要素が無くなった場合を条件にすること！！！
+    #while current_id<=n-1:
+    while 1:
+        try:
+            #print(queue,current_id,is_visited)
+            cost=queue[current_id][1]
+        #######↓current_idを、今いるノード番号と混同してしまっていることで、ややこしくなってしまっている。
+        ######→queueで先頭要素取り出しの実装を行なった方が計算も早く、簡潔！！！
+            #result[current_id]=cost
+            result[queue[current_id][0]]=cost
+            #for ch in G[current_id]:
+            for ch in G[queue[current_id][0]]:
+            ######↓chに格納されているnodeは１〜の数字なので、リストのインデックスとしては-1しないといけない！！！
+                #if not is_visited[ch]:
+                if not is_visited[ch-1]:
+                    queue.append([ch-1,cost+1])
+                    is_visited[ch-1]=True
+
+            current_id+=1
+        except:
+            break
+
+search()
+
+for i in range(n):
+    if is_visited[i]:
+        print(i+1,result[i])
+    else:
+        print(i+1,-1)
+
+    
+
+
+
 
         
