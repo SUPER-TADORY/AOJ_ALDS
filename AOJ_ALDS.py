@@ -1973,7 +1973,7 @@ for u in range(n):
 """
 ########################################################################
 #1_11_C　幅優先探索
-
+"""
 import sys
 
 n=int(input())
@@ -2033,8 +2033,60 @@ for i in range(n):
     else:
         print(i+1,-1)
 
-    
+####→→→→→先頭か末尾に追加or取り出ししかしない場合は、from collections import dequeの方が計算コスト小さい！！！
+"""
+########################################################################
+#1_11_D　連結線分分解
 
+import sys
+from collections import defaultdict
+
+sys.setrecursionlimit(1<<25)
+
+G=defaultdict(lambda:[])
+n,m=map(int,input().split())
+
+for _ in range(m):
+    a,b=map(int,sys.stdin.readline().split())
+    G[a].append(b)
+    G[b].append(a)
+
+####↓これだと、ぼっちノードが含まれない！！！出力の時に、キーに入っていないのでエラーとなる！！！
+#color={key:None for key in G.keys()}
+color={key:None for key in range(n)}
+
+#####↓繋がりがあるグループのノード全てに同じ色をつける！！
+#####(疑問)これで全てのノードを網羅できるのか→→→→→→深さ優先探索だから、それが成り立つ！！！
+def coloring(node,iro):
+    global color
+
+    if color[node] is not None:
+        return
+
+#####↓色付けしないと意味がない！！！これがないと、処理が莫大になり、落ちる！！！
+    color[node]=iro
+    
+    for nod in G[node]:
+        coloring(nod,iro)
+    
+    return
+
+iro=1
+for nod in color.keys():
+    coloring(nod,iro)
+    iro+=1
+
+q=int(input())
+#print(color)
+for _ in range(q):
+    x,y=map(int,sys.stdin.readline().split())
+######↓colorがNoneの場合もあることを忘れている！！馬鹿かゴミが！！！ None同志なら友達でもなんでもない！！！
+#######↓a,bじゃなくて、x,yな!馬鹿か！！！
+    #if color[a]==color[b]:
+    if (color[x] is not None) and (color[y] is not None) and (color[x]==color[y]):
+        print("yes") 
+    else:
+        print("no")   
 
 
 
