@@ -2036,8 +2036,8 @@ for i in range(n):
 ####→→→→→先頭か末尾に追加or取り出ししかしない場合は、from collections import dequeの方が計算コスト小さい！！！
 """
 ########################################################################
-#1_11_D　連結線分分解
-
+#1_11_D　連結成分分解
+"""
 import sys
 from collections import defaultdict
 
@@ -2087,6 +2087,164 @@ for _ in range(q):
         print("yes") 
     else:
         print("no")   
+"""
+########################################################################
+#1_12_A　最小全域木(prim法)
+"""
+#####↓最小値をひとつづつ取り出していくとき、優先度付きヒープを使うと良い！！！
+from heapq  import heapify,heappop
+
+n=int(input())
+G=[list(map(int,input().split())) for _ in range(n)]
+
+INF=2**32-1
+heap=[[INF,x] for x in range(n)]
+heap[0]=[0,0]
+weight=0
+while heap:
+#####↓heappopをすると、ヒープ構造壊れるので、毎ループでヒープにかけてあげないといけない！！！
+#####↓heapの各要素はlistであるが、各要素のリストの一番目の要素で自動的にヒープ構造作成！！！
+    heapify(heap)
+    w,u=heappop(heap)
+    weight+=w
+    for i,[w,v] in enumerate(heap):
+    #######↓ここが一番わかりにくい！！！Gは、現在わかっている部分最小全域木からそのノードへの最小コスト
+    ########→→→→→部分最小全域木にノード付け足すときに、その最小コストも更新しないといけない！！！
+        if 0<=G[u][v]<w:
+        ########↓heapには、リストを入れているのに、更新の時にint入れていたらエラー起こるだろ！！！要注意！！！
+            #heap[i]=G[u][v]
+            heap[i]=[G[u][v],v]
+
+print(weight)
+"""
+########################################################################
+#1_12_A　単一始点最短経路(ダイクストラ法) 1h40min
+"""
+from sys import stdin
+
+n=int(input())
+INF=2**32-1
+M=[[INF]*n for _ in range(n)]
+for i in range(n):
+    input_=[*map(int,stdin.readline().split())]
+    if input_[1]!=0:
+        for m,o in enumerate(input_[2:]):
+            if m%2==0:
+                ind=o
+            else:
+                M[i][ind]=o
+
+#from pprint import pprint
+#pprint(M)
+
+def dijkstra(adj_mat:list,s:int):
+    color=[0]*n #####訪問したかどうか！1なら最短経路にすでに追加されている！
+    D=[INF]*n ######始点からD[i]への最短コスト！！！ 
+    P=[None]*n #####iノードの親(経路を出力するときはこれを使う！！！)
+
+#####↓始点に関する設定
+    D[0]=0
+    P[0]=None
+
+    while 1:
+        min_cost=INF
+    #####↓次に最短経路に追加するノードを決める！！！
+        for i in range(n):
+    ##########↓このifで、次に追加するノード(最短経路に隣接するノード)が絞れる！！！
+    ########→→→→→未訪問のノードの中で、D[i]がINFから更新されているのは隣接ノードだけ！！！！
+            if color[i]==0 and D[i]<min_cost:
+                min_cost=D[i]
+                u=i
+        
+    #####↓もうノードがない！！！
+        if min_cost==INF:
+            break
+
+        color[u]=1
+
+        for v in range(n):
+        #######↓このifで、最短経路に隣接するノードを絞り込むことができる！！！
+            if color[v]==0 and adj_mat[u][v]!=INF:
+                if adj_mat[u][v]+min_cost < D[v]:
+                    D[v]=adj_mat[u][v]+min_cost
+                #####↓ここで親更新！！！
+                    P[v]=u
+    
+    return D,P
+
+D,P=dijkstra(M,0)
+
+for i in range(n):
+    print(i,D[i])
+"""
+########################################################################
+#1_12_A　単一始点最短経路(ダイクストラ法)(heapqによる改善) 55min
+#####メモリ制限により、隣接行列は使えない！→→→隣接リストを用いる
+"""
+from heapq import heapify,heappop,heappush
+from sys import stdin
+from pprint import pprint
+
+INF=2**32-1
+n=int(input())
+####↓馬鹿か！！！入力の隣接リストとPriority Queueは全くの別物！！！よく考えろアホ
+#heap=[[] for _ in range(n)]
+G=[[] for _ in range(n)]
+for i in range(n):
+    u,k,*l=map(int,stdin.readline().split())
+    if k!=0:
+        for v,c in zip(l[::2],l[1::2]):
+            G[u].append((v,c))
+#pprint(G)
+
+def dijkstra(adj:list,s:int):
+    color=[0]*n
+######↓heapを検索してノードに対応したコスト探すと時間かかるから、別のリストで保持しておかないといけない！！！
+    D=[INF]*n
+    P=[None]*n
+
+    D[s]=0
+    P[s]=None
+#####↓後で追加、取り出しを行うので、最初のPriority Queueは初期状態で渡せば良い！！！
+######↓heap=[]だと、このリストに要素が追加されていってしまう！！！アホか！！
+    #heap=[s,0]
+    heap=[(s,0)]
+    heapify(heap)
+
+    while heap:
+        min_cost,u=heappop(heap)
+
+    ######↓使わない！！！
+        #if min_cost==INF:
+        #    break
+        if D[u]<min_cost:
+            continue
+
+        color[u]=1
+
+    ######↓前問と同様に現在の最短経路に隣接するノードを絞ろうとしたが、今回は隣接リストだからそのまま取り出せば良い！！！
+        #for v in range(n):
+        #    if color[v]==0 and G[]
+        for v_u,c_v_u in G[u]:
+    ###########↓そのノードが未訪問であるという条件も忘れずに！！！
+            if color[v_u]==0:
+                if D[v_u] > min_cost+c_v_u:
+                    D[v_u]=min_cost+c_v_u
+                    heappush(heap,(min_cost+c_v_u,v_u))
+                    P[v_u]=u
+        
+    return D,P
+
+D,P=dijkstra(G,0)
+
+for i in range(n):
+    print(i,D[i])
+"""
+
+
+
+
+
 
 
 
