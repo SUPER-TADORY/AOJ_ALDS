@@ -2118,7 +2118,7 @@ while heap:
 print(weight)
 """
 ########################################################################
-#1_12_A　単一始点最短経路(ダイクストラ法) 1h40min
+#1_12_B　単一始点最短経路(ダイクストラ法) 1h40min
 """
 from sys import stdin
 
@@ -2178,7 +2178,7 @@ for i in range(n):
     print(i,D[i])
 """
 ########################################################################
-#1_12_A　単一始点最短経路(ダイクストラ法)(heapqによる改善) 55min
+#1_12_C　単一始点最短経路(ダイクストラ法)(heapqによる改善) 55min
 #####メモリ制限により、隣接行列は使えない！→→→隣接リストを用いる
 """
 from heapq import heapify,heappop,heappush
@@ -2240,8 +2240,163 @@ D,P=dijkstra(G,0)
 for i in range(n):
     print(i,D[i])
 """
+########################################################################
+#DSL_1_A Union find tree
+"""
+import sys
 
+class Unionfind():
+    def __init__(self,n):
+        self.n=n
+    #####↓そのnode(index)の所属する木のサイズを保存！(親ノードの場合、-で区別！)
+    #####↑違う！！！　rootであれば、(-1)*その木のサイズ、rootじゃなければひとつ上の親ノードhが格納されている！！！
+    ######→(((rootのところはどうせNoneなので、そこにサイズ入れれば無駄にならずに済む！！！)))
+        self.parent=[-1]*n
+        
 
+    def root(self,A):
+    ######↓parent[A]がーの時に、そのノードを返すので、この時のAはrootのノードのインデックス！！！
+        if self.parent[A]<0:
+            return A
+
+    #####(((((重要！！！)))))　この再帰によって、木の深さを1に慣らしている！！！
+    #########芋づる式にたどっていって、そのparentをrootに置き換えていっている！！！
+        self.parent[A]=self.root(self.parent[A])
+        
+        return self.parent[A]
+
+    def size(self,A):
+    #####↓parent[rootのindex]のみ、その木の大きさが格納されている！！！
+    #####(((((((重要！！！)))))))　親なら-1をかけて区別するという工夫！！！　いちいちbool型で保持する必要なし！！！
+        return (-1)*self.parent[self.root(A)]
+
+    def unite(self,A,B):
+    ######↓この時得られるのは、rootノードのindex!!!!!
+        A=self.root(A)
+        B=self.root(B)
+        if A==B:
+            return False
+        
+        if self.size(A)<self.size(B):
+            A,B=B,A
+
+#########↓parent[rootのindex]のみ、その木の大きさが格納されている！！！　(ー)＋(ー)がされている！！！
+        self.parent[A]+=self.parent[B]
+        self.parent[B]=A
+
+    def same(self,A,B):
+        return self.root(A)==self.root(B)
+
+n,q=map(int,sys.stdin.readline().split())
+uf=Unionfind(n)
+
+for i in range(q):
+    com,x,y=map(int,sys.stdin.readline().split())
+
+    #print(uf.parent)
+
+    if com==0:
+        uf.unite(x,y)
+    if com==1:
+        o=uf.same(x,y)
+        print(1 if o else 0)
+"""
+########################################################################
+#DSL_2_C　kD Tree　(TLE)
+
+from sys import stdin
+from operator import itemgetter
+
+class TwoDTree():
+    def __init__(self,P):
+    #####↓.copy()をしなかったら、、、
+        n=len(P)
+    #####↓Pには、(id, x, y)で座標が保存されている！！！
+        self.P=P.copy()
+    #####↓これの用途がよくわからん→→→indexが木の中のnode番号、valueが入力Pのなかの番号
+    #######(木の探索をしていく中で、Pで座標を参照するのに必要！！！)　location,left,rightが木の本体をなす！！！
+        self.location=[None]*n
+        self.left=[None]*n
+        self.right=[None]*n
+        self.np=0
+        self.make2DTree(0,n,0)
+
+#####↓depthは偶数の時x軸について、奇数の時y軸について、というのを決める。 二分探索木なので回帰を利用！！！
+    def make2DTree(self,left,right,depth):
+        l=left
+        r=right
+
+        if not l<r:
+            return None
+
+        t=self.np
+        self.np+=1
+
+        if depth%2==0:
+    ########↓(((重要)))　ここは、xの値に関してリストをソートするということ！Pについての値を変化させるわけではなく、並び替えるだけ！！！
+        ######(これは、x軸に関して整列させている) 
+###############↓((((重要！！！))))クラス内の変数と、グローバル変数は同じ名前にしない方が良い！selfつけ忘れた時に、エラーがややこしくなる！！！  
+            #self.P[l:r]=sorted(P[l:r],key=itemgetter(1))
+            self.P[l:r]=sorted(self.P[l:r],key=itemgetter(1))
+        else:
+        ######(これは、y軸に関して整列させている)     
+            #self.P[l:r]=sorted(P[l:r],key=itemgetter(2))
+            self.P[l:r]=sorted(self.P[l:r],key=itemgetter(2))
+
+    #####↓このmidは、この先の回帰でPを整列していっても、不変！(midは避けて整列しているから！！！)
+        mid=(l+r)//2
+        self.location[t]=mid
+        self.left[t]=self.make2DTree(l,mid,depth+1)
+        self.right[t]=self.make2DTree(mid+1,r,depth+1)
+
+        return t
+
+    def find(self,sx,tx,sy,ty):
+    ######↓範囲内に含まれる点を格納！
+        ret=[]
+
+    #####↓回帰を利用！！！ depthでx軸、y軸どちらにfocusするかを判定しないといけない！！！
+        def dfs(v,sx,tx,sy,ty,depth):
+            ind,x,y=self.P[self.location[v]]
+
+            if (sx<=x<=tx) and (sy<=y<=ty):
+                ret.append((ind,x,y))
+
+            if depth%2==0:
+        ########↓(((重要！！！)))そもそも二分探索木の枝があるかどうかを確認しないといけない！！！
+                if self.left[v] is not None and x >= sx:
+                    dfs(self.left[v],sx,tx,sy,ty,depth+1)
+                if self.right[v] is not None and x <= tx:
+                    dfs(self.right[v],sx,tx,sy,ty,depth+1)
+            else:
+                if self.left[v] is not None and y >= sy:
+                    dfs(self.left[v],sx,tx,sy,ty,depth+1)
+                if self.right[v] is not None and y <= ty:
+                    dfs(self.right[v],sx,tx,sy,ty,depth+1)
+
+    ######↓vはnodeの番号なので、0からスタートして良い！！！   
+        dfs(0,sx,tx,sy,ty,0)
+        return ret
+
+# load data
+N=int(input())
+P=[]
+for i in range(N):
+    x,y=map(int,stdin.readline().split())
+    P.append((i,x,y))
+
+tree=TwoDTree(P)
+
+q=int(input())
+for _ in range(q):
+    sx,tx,sy,ty=map(int,stdin.readline().split())
+    ret=tree.find(sx,tx,sy,ty)
+    ret=sorted(ret,key=itemgetter(0))
+    for o in ret:
+        print(o[0])
+    print()
+
+        
 
 
 
